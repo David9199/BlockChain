@@ -91,9 +91,11 @@ contract MyNFTMarket {
     }
 
     function buyNFT(address nftAddress, uint256 tokenId) external {
+        require(msg.sender != saleNfts[nftAddress][tokenId].seller, "buyer can not be seller");
         uint256 price = saleNfts[nftAddress][tokenId].price;
         uint256 tokenBalance = SPACE.balanceOf(msg.sender);
         require(tokenBalance >= price, "balance error");
+        // require(SPACE.allowance(msg.sender, address(this)) >= price, "allowance error");
 
         address seller = saleNfts[nftAddress][tokenId].seller;
 
@@ -153,7 +155,11 @@ contract MyNFTMarket {
         return uint64(block.timestamp);
     }
 
-    function getPrice(address nftAddress, uint256 tokenId) public view returns (uint256) {
+    function nftPrice(address nftAddress, uint256 tokenId) public view returns (uint256) {
         return saleNfts[nftAddress][tokenId].price;
+    }
+
+    function nftSeller(address nftAddress, uint256 tokenId) public view returns (address) {
+        return saleNfts[nftAddress][tokenId].seller;
     }
 }
