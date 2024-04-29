@@ -1,11 +1,6 @@
 import { configConn } from './config'
 import { parseAbiItem } from 'viem'
 
-/**
- * 将给定的bigint整除1000000后保留小数位，以字符串形式返回
- * @param aBigint 
- * @returns 
- */
 function bigintToStr6(aBigint: bigint) {
     const dd = aBigint/1000000n;
     const xx = aBigint % 1000000n;
