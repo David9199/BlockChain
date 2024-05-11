@@ -133,7 +133,10 @@ contract RntStake {
 
             uint256 redeemEsRnt = esRntAmount - _releaseRnt;
             uint256 expireEsRnt;
+            uint256 esRntLock;
             for (uint32 i = start; i < nowDate; i++) {
+                esRntLock = esRntLocks[msg.sender][i];
+                if (esRntLock == 0) continue;
                 expireEsRnt = (esRntLocks[msg.sender][i] * (nowDate - i)) / 30;
                 burnEsRnt += (esRntLocks[msg.sender][i] - expireEsRnt);
                 actualEsRnt += expireEsRnt;
