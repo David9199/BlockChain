@@ -24,6 +24,7 @@ contract TokenIdo {
 
     constructor() {}
 
+    //启动IDO
     function launch(
         address token,
         uint256 start,
@@ -54,6 +55,7 @@ contract TokenIdo {
         );
     }
 
+    //用户参与IDO预售
     function presale(address token) external payable {
         require(block.timestamp > idos[token].start, "Not start");
         require(block.timestamp < idos[token].end, "Has ended");
@@ -68,10 +70,11 @@ contract TokenIdo {
         myPresale[msg.sender][token] += msg.value;
     }
 
+    //用户领取代币，失败则退回ETH
     function refund(address token) external {
         require(
             block.timestamp > idos[token].end ||
-                idos[token].idoValue >= idos[token].softTop,
+                idos[token].idoValue >= idos[token].hardTop,
             "Not end"
         );
         require(myPresale[msg.sender][token] > 0, "You didn't participate");
@@ -93,10 +96,11 @@ contract TokenIdo {
         }
     }
 
+    //项目方提取IDO资金
     function retrieve(address token) external {
         require(
             block.timestamp > idos[token].end ||
-                idos[token].idoValue >= idos[token].softTop,
+                idos[token].idoValue >= idos[token].hardTop,
             "Not end"
         );
         require(msg.sender == idos[token].launcher, "You are not the launcher");
