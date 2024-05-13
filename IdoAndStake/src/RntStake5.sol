@@ -15,12 +15,10 @@ library DateTime {
     function getNowDateTime() public view returns (uint32) {
         uint256 ts = block.timestamp + 8 hours;
         return uint32(ts / 1 days);
-        // return uint32(ts / 1 minutes);
     }
 
     function tsToDateTime(uint256 ts) public pure returns (uint32) {
         return uint32((ts + 8 hours) / 1 days);
-        // return uint32((ts + 8 hours) / 1 minutes);
     }
 }
 
@@ -80,6 +78,7 @@ contract RntStake {
             rntAmount
         );
 
+        //质押以天为单位进行记录与结算
         if (stakes[msg.sender].rntAmount == 0) {
             stakes[msg.sender] = Stake(rntAmount, 0, DateTime.getNowDateTime());
         } else {
@@ -117,11 +116,11 @@ contract RntStake {
         emit RetrieveRnt(msg.sender, rntAmount, unDrawEsRnt);
     }
 
-    //解锁RNT
+    //解锁esRNT
     function rntRelease(uint256 esRntAmount) external beforeEsRnt {
         uint256 _releaseRnt = releaseRnt[msg.sender];
-        uint256 actualEsRnt;
-        uint256 burnEsRnt;
+        uint256 actualEsRnt;//提前解锁实际到手的EsRnt
+        uint256 burnEsRnt;//提前解锁燃烧掉的EsRnt
         if (_releaseRnt < esRntAmount) {
             //提前解锁
             releaseRnt[msg.sender] = 0;
@@ -131,21 +130,22 @@ contract RntStake {
                 : nowDate - 29;
             lastReleaseDate[msg.sender] > nowDate - 29;
 
+            //用户提前解锁的部分
             uint256 redeemEsRnt = esRntAmount - _releaseRnt;
             uint256 expireEsRnt;
             uint256 esRntLock;
             for (uint32 i = start; i < nowDate; i++) {
                 esRntLock = esRntLocks[msg.sender][i];
                 if (esRntLock == 0) continue;
-                expireEsRnt = (esRntLocks[msg.sender][i] * (nowDate - i)) / 30;
-                burnEsRnt += (esRntLocks[msg.sender][i] - expireEsRnt);
+                expireEsRnt = (esRntLock * (nowDate - i)) / 30;
+                burnEsRnt += (esRntLock - expireEsRnt);
                 actualEsRnt += expireEsRnt;
 
-                if (esRntLocks[msg.sender][i] >= redeemEsRnt) {
+                if (esRntLock >= redeemEsRnt) {
                     lastReleaseDate[msg.sender] = i;
                     break;
                 } else {
-                    redeemEsRnt = redeemEsRnt - esRntLocks[msg.sender][i];
+                    redeemEsRnt = redeemEsRnt - esRntLock;
                 }
                 if (i + 1 == nowDate) {
                     lastReleaseDate[msg.sender] = i;
