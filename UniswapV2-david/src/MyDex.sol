@@ -13,6 +13,10 @@ contract MyDex {
     ERC20Token public USDT;
     ERC20Token public RNT;
 
+    event AddLiquidity(address account, uint amountInToken, uint amountInETH, uint liquidity);
+    event SellETH(address account, address buyToken, uint256 sellEthAmount);
+    event BuyETH(address account, address sellToken, uint256 sellAmount);
+
     constructor(address _factory, address _WETH, address _router, address _USDT, address _RNT) {
         factory = UniswapV2Factory(_factory);
         WETH = ERC20Token(_WETH);//使用假WETH（ERC20）测试,WETH未与ETH关联
@@ -40,6 +44,8 @@ contract MyDex {
             );
 
         require(liquidity > 0, "addLiquidityETH fail");
+
+        emit AddLiquidity(msg.sender, amountInToken, amountInETH, liquidity);
     }
 
     function sellETH(
@@ -58,6 +64,8 @@ contract MyDex {
             msg.sender,
             block.timestamp
         );
+
+        emit SellETH(msg.sender, buyToken, sellEthAmount);
     }
 
     function buyETH(
@@ -76,5 +84,7 @@ contract MyDex {
             msg.sender,
             block.timestamp
         );
+
+        emit BuyETH(msg.sender, sellToken, sellAmount);
     }
 }
